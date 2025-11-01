@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  insight-scope:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      - LLM_PROVIDER=gpt4all
+      - GPT4ALL_MODEL=orca-mini-3b-gguf2-q4_0.gguf
+      - GPT4ALL_MODEL_PATH=/app/models/
+      - EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+      - VECTOR_DB_PATH=/app/vector_db
+      - CHUNK_SIZE=1000
+      - CHUNK_OVERLAP=200
+    volumes:
+      - ./vector_db:/app/vector_db
+      - ./data:/app/data
+      - gpt4all_models:/app/models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  gpt4all_models:

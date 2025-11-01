@@ -5,6 +5,7 @@ import streamlit as st
 import os
 import sys
 import time
+import numpy as np
 from pathlib import Path
 
 # Add project root to path
@@ -170,7 +171,18 @@ if prompt := st.chat_input("Ask a question about your company data"):
         with st.spinner("Thinking..."):
             # Check if documents have been uploaded
             vector_store = VectorStore()
-            if not vector_store.has_documents():
+            # Check if documents exist by trying to search with a dummy query
+            has_documents = False
+            try:
+                # Try using has_documents method if available
+                has_documents = vector_store.has_documents()
+            except AttributeError:
+                # Fallback: Check if search returns any results
+                dummy_embedding = np.zeros((1, 768))  # Standard embedding size
+                results = vector_store.search(dummy_embedding)
+                has_documents = len(results) > 0
+                
+            if not has_documents:
                 st.warning("No documents have been uploaded yet. Please upload documents using the sidebar to enable question answering.")
                 response = {
                     "answer": "I don't have any documents to search through. Please upload some documents using the file uploader in the sidebar.",

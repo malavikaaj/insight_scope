@@ -168,13 +168,22 @@ if prompt := st.chat_input("Ask a question about your company data"):
     # Generate response
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response = st.session_state.rag_pipeline.query(prompt)
+            # Check if documents have been uploaded
+            vector_store = VectorStore()
+            if not vector_store.has_documents():
+                st.warning("No documents have been uploaded yet. Please upload documents using the sidebar to enable question answering.")
+                response = {
+                    "answer": "I don't have any documents to search through. Please upload some documents using the file uploader in the sidebar.",
+                    "sources": []
+                }
+            else:
+                response = st.session_state.rag_pipeline.query(prompt)
             
             # Display response
             st.markdown(response["answer"])
             
             # Add sources to message
-            if "sources" in response:
+            if "sources" in response and response["sources"]:
                 with st.expander("View Sources"):
                     for i, source in enumerate(response["sources"]):
                         st.markdown(f"**Source {i+1}**")

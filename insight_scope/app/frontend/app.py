@@ -214,3 +214,12 @@ if prompt := st.chat_input("Ask a question about your company data"):
         "content": response["answer"],
         "sources": response.get("sources", [])
     })
+    st.divider()
+    st.subheader("Knowledge Base")
+    if st.button("Reset knowledge base", help="Clear all indexed documents"):
+        vs = VectorStore()
+        try:
+            vs.reset()
+            st.success("Knowledge base cleared. Upload documents to re-index.")
+        except Exception as e:
+            st.error(f"Failed to clear knowledge base: {e}")

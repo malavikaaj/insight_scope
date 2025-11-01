@@ -75,6 +75,36 @@ class VectorStore:
             # Will be initialized when first embeddings are added
             self.index = None
             self.metadata = {"ids": [], "documents": [], "metadata": []}
+
+    def reset(self):
+        """Clear all stored documents and reinitialize the vector store."""
+        if self.db_type == "chroma":
+            # Delete the existing collection and recreate
+            try:
+                self.client.delete_collection("documents")
+            except Exception:
+                pass
+            try:
+                self.collection = self.client.create_collection("documents")
+            except Exception:
+                # If creation fails because it exists, get it
+                try:
+                    self.collection = self.client.get_collection("documents")
+                except Exception:
+                    # As a last resort, reinitialize the client and collection
+                    self._init_chroma()
+        elif self.db_type == "faiss":
+            # Remove index and metadata files
+            try:
+                if os.path.exists(self.index_path):
+                    os.remove(self.index_path)
+                if os.path.exists(self.metadata_path):
+                    os.remove(self.metadata_path)
+            except Exception:
+                pass
+            # Reset in-memory structures
+            self.index = None
+            self.metadata = {"ids": [], "documents": [], "metadata": []}
     
     def add_documents(self, documents: List[Dict[str, Any]], embeddings: np.ndarray, ids: Optional[List[str]] = None):
         """

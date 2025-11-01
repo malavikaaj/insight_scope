@@ -4,16 +4,24 @@ Streamlit frontend for InsightScope.
 import streamlit as st
 import os
 import sys
-from pathlib import Path
 import time
+from pathlib import Path
 
 # Add project root to path
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent.parent))
 
-from insight_scope.models.llm.rag_pipeline import RAGPipeline
-from insight_scope.utils.preprocessing.document_loader import DocumentLoader
-from insight_scope.models.embeddings.embedding_manager import EmbeddingManager
-from insight_scope.models.embeddings.vector_store import VectorStore
+# Try direct imports first, then fallback to relative imports
+try:
+    from insight_scope.models.llm.rag_pipeline import RAGPipeline
+    from insight_scope.utils.preprocessing.document_loader import DocumentLoader
+    from insight_scope.models.embeddings.embedding_manager import EmbeddingManager
+    from insight_scope.models.embeddings.vector_store import VectorStore
+except ImportError:
+    # Fallback to relative imports for Streamlit Cloud
+    from models.llm.rag_pipeline import RAGPipeline
+    from utils.preprocessing.document_loader import DocumentLoader
+    from models.embeddings.embedding_manager import EmbeddingManager
+    from models.embeddings.vector_store import VectorStore
 
 # Page configuration
 st.set_page_config(

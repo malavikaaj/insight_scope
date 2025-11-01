@@ -177,10 +177,14 @@ if prompt := st.chat_input("Ask a question about your company data"):
                 # Try using has_documents method if available
                 has_documents = vector_store.has_documents()
             except AttributeError:
-                # Fallback: Check if search returns any results
-                dummy_embedding = np.zeros((1, 768))  # Standard embedding size
-                results = vector_store.search(dummy_embedding)
-                has_documents = len(results) > 0
+                # Fallback: Check if the vector store directory has files
+                if vector_store.db_type == "chroma":
+                    try:
+                        has_documents = vector_store.collection.count() > 0
+                    except:
+                        has_documents = False
+                elif vector_store.db_type == "faiss":
+                    has_documents = os.path.exists(vector_store.index_path) and os.path.getsize(vector_store.index_path) > 100
                 
             if not has_documents:
                 st.warning("No documents have been uploaded yet. Please upload documents using the sidebar to enable question answering.")
